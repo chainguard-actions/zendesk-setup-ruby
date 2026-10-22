@@ -1,0 +1,28 @@
+name: Test .ruby-version file in working-directory
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create .ruby-version
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/rv-test"
+          echo "3.2" > "$GITHUB_WORKSPACE/rv-test/.ruby-version"
+      - id: action
+        uses: .
+        with:
+          working-directory: rv-test
+          bundler: none
+      - name: Assert ruby version from file
+        env:
+          PREFIX: ${{ steps.action.outputs.ruby-prefix }}
+        run: |
+          echo "prefix: $PREFIX"
+          V="$(ruby -e 'print RUBY_VERSION')"
+          echo "ruby version: $V"
+          case "$V" in
+            3.2.*) echo "PASS" ;;
+            *) echo "FAIL: expected 3.2.x"; exit 1 ;;
+          esac

@@ -1,0 +1,25 @@
+name: Test .tool-versions file
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create .tool-versions
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tv-test"
+          printf 'nodejs 20.0.0\nruby 3.4\n' > "$GITHUB_WORKSPACE/tv-test/.tool-versions"
+      - id: action
+        uses: .
+        with:
+          working-directory: tv-test
+          bundler: none
+      - name: Assert ruby version from .tool-versions
+        run: |
+          V="$(ruby -e 'print RUBY_VERSION')"
+          echo "ruby version: $V"
+          case "$V" in
+            3.4.*) echo "PASS" ;;
+            *) echo "FAIL: expected 3.4.x"; exit 1 ;;
+          esac

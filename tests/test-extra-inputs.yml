@@ -1,0 +1,37 @@
+name: Test optional inputs (rubygems, self-hosted, windows-toolchain, cache-version)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          ruby-version: '3.3'
+          bundler: none
+          rubygems: default
+          self-hosted: 'false'
+          windows-toolchain: none
+          cache-version: v1
+      - name: Assert ruby-prefix output
+        env:
+          PREFIX: ${{ steps.action.outputs.ruby-prefix }}
+        run: |
+          echo "prefix: $PREFIX"
+          if [ -z "$PREFIX" ]; then echo "FAIL: empty ruby-prefix"; exit 1; fi
+          if [ ! -x "$PREFIX/bin/ruby" ]; then echo "FAIL: $PREFIX/bin/ruby missing"; exit 1; fi
+          echo "PASS"
+      - name: Assert ruby and gem work
+        run: |
+          V="$(ruby -e 'print RUBY_VERSION')"
+          echo "ruby version: $V"
+          case "$V" in
+            3.3.*) ;;
+            *) echo "FAIL: expected 3.3.x"; exit 1 ;;
+          esac
+          G="$(gem --version)"
+          echo "gem version: $G"
+          if [ -z "$G" ]; then echo "FAIL: gem not working"; exit 1; fi
+          echo "PASS"
