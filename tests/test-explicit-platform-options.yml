@@ -1,0 +1,34 @@
+name: Test explicit self-hosted, windows-toolchain and cache-version options
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Prepare empty working directory
+        run: mkdir -p "$GITHUB_WORKSPACE/rb-platform"
+      - id: action
+        uses: .
+        with:
+          ruby-version: '3.3'
+          bundler: none
+          self-hosted: 'false'
+          windows-toolchain: none
+          cache-version: 'v2'
+          working-directory: rb-platform
+      - name: Assert ruby installed
+        env:
+          ACTUAL: ${{ steps.action.outputs.ruby-prefix }}
+        run: |
+          echo "ruby-prefix: $ACTUAL"
+          if [ -z "$ACTUAL" ] || [ ! -x "$ACTUAL/bin/ruby" ]; then
+            echo "FAIL: ruby not installed at prefix"
+            exit 1
+          fi
+          V="$(ruby -e 'print RUBY_VERSION')"
+          echo "ruby version: $V"
+          case "$V" in
+            3.3.*) echo "PASS" ;;
+            *) echo "FAIL: expected Ruby 3.3.x"; exit 1 ;;
+          esac
