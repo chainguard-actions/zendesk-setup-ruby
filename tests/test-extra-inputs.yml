@@ -1,0 +1,37 @@
+name: Test self-hosted false, windows-toolchain none, cache-version
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          ruby-version: '3.3.6'
+          bundler: none
+          self-hosted: 'false'
+          windows-toolchain: none
+          cache-version: 'v1'
+          working-directory: tests/fixtures/empty-project
+      - name: Assert ruby-prefix output and ruby version
+        env:
+          PREFIX: ${{ steps.action.outputs.ruby-prefix }}
+        run: |
+          echo "ruby-prefix: $PREFIX"
+          if [ -z "$PREFIX" ] || [ ! -x "$PREFIX/bin/ruby" ]; then
+            echo "FAIL: ruby not installed at prefix"
+            exit 1
+          fi
+          case "$PREFIX" in
+            *3.3.6*) ;;
+            *) echo "FAIL: prefix does not contain version 3.3.6"; exit 1 ;;
+          esac
+          ACTUAL="$(ruby -e 'print RUBY_VERSION')"
+          echo "ruby: $ACTUAL"
+          if [ "$ACTUAL" != "3.3.6" ]; then
+            echo "FAIL: expected 3.3.6"
+            exit 1
+          fi
+          echo "PASS"
