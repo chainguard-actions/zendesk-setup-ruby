@@ -1,0 +1,31 @@
+name: Test Bundler version from Gemfile.lock BUNDLED WITH
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          ruby-version: '3.3'
+          working-directory: tests/fixtures/bundler-app
+      - name: Assert bundler 2.5.6 was installed
+        run: |
+          ruby -v
+          gem list bundler
+          if ! gem list bundler | grep -q '2\.5\.6'; then
+            echo "FAIL: bundler 2.5.6 not installed"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert bundle -v in app dir uses 2.5.6
+        working-directory: tests/fixtures/bundler-app
+        run: |
+          OUT="$(bundle -v)"
+          echo "bundle -v: $OUT"
+          case "$OUT" in
+            *2.5.6*) echo "PASS" ;;
+            *) echo "FAIL: expected Bundler 2.5.6"; exit 1 ;;
+          esac
