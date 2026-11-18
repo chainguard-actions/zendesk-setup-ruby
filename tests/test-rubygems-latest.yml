@@ -1,0 +1,35 @@
+name: Test updating RubyGems to latest
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          ruby-version: '3.3'
+          rubygems: latest
+          bundler: none
+      - name: Assert ruby and gem are available
+        env:
+          PREFIX: ${{ steps.action.outputs.ruby-prefix }}
+        run: |
+          echo "ruby-prefix: $PREFIX"
+          if [ -z "$PREFIX" ] || [ ! -x "$PREFIX/bin/ruby" ]; then
+            echo "FAIL: ruby-prefix invalid"
+            exit 1
+          fi
+          GV="$(gem --version)"
+          echo "gem --version: $GV"
+          if ! echo "$GV" | grep -qE '^[0-9]+\.[0-9]+'; then
+            echo "FAIL: unexpected gem version output"
+            exit 1
+          fi
+          # Ruby 3.3 ships RubyGems 3.5.x; latest must be >= that
+          if ! ruby -e 'exit(Gem::Version.new(ARGV[0]) >= Gem::Version.new("3.5.0") ? 0 : 1)' "$GV"; then
+            echo "FAIL: RubyGems version $GV older than expected"
+            exit 1
+          fi
+          echo "PASS"
