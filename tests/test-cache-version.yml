@@ -1,0 +1,34 @@
+name: Test bundler-cache with a custom cache-version
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create a minimal Gemfile project
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/cache-project"
+          printf 'source "https://rubygems.org"\n' > "$GITHUB_WORKSPACE/cache-project/Gemfile"
+      - id: action
+        uses: .
+        with:
+          ruby-version: '3.3'
+          bundler-cache: 'true'
+          cache-version: 'test-v42'
+          working-directory: cache-project
+      - name: Assert bundle install ran in the working directory
+        working-directory: cache-project
+        run: |
+          ls -la
+          if [ ! -f Gemfile.lock ]; then
+            echo "FAIL: Gemfile.lock was not generated"
+            exit 1
+          fi
+          cat Gemfile.lock
+          bundle config get path
+          if ! bundle exec ruby -e 'puts "bundle exec ok"'; then
+            echo "FAIL: bundle exec failed"
+            exit 1
+          fi
+          echo "PASS"

@@ -1,0 +1,29 @@
+name: Test installing a specific Bundler version
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          ruby-version: '3.3'
+          bundler: '2.4.22'
+      - name: Assert bundler 2.4.22 is installed
+        run: |
+          # Ruby 3.3 ships a newer default bundler (2.5.x), which plain `bundle`
+          # prefers. Check that the requested version was installed and can be run.
+          gem list bundler
+          if ! gem list bundler --exact | grep -qE '(\(|, )(default: )?2\.4\.22(,|\))'; then
+            echo "FAIL: bundler 2.4.22 not found in gem list"
+            exit 1
+          fi
+          V="$(bundle _2.4.22_ -v | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1)"
+          echo "bundle _2.4.22_ -v: $V"
+          if [ "$V" != "2.4.22" ]; then
+            echo "FAIL: expected bundler 2.4.22"
+            exit 1
+          fi
+          echo "PASS"

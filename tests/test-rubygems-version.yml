@@ -1,0 +1,24 @@
+name: Test updating RubyGems to a specific version
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          ruby-version: '3.3'
+          bundler: none
+          rubygems: '3.6.9'
+      - name: Assert RubyGems is at least 3.6.9
+        run: |
+          which gem
+          V="$(gem -v)"
+          echo "gem -v: $V"
+          if ! ruby -e 'exit(Gem::Version.new(ARGV[0]) >= Gem::Version.new("3.6.9"))' "$V"; then
+            echo "FAIL: expected RubyGems >= 3.6.9"
+            exit 1
+          fi
+          echo "PASS"
