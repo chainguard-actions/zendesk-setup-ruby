@@ -20,6 +20,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v1.338.0 | [`v1.338.0`](https://github.com/chainguard-actions/zendesk-setup-ruby/tree/v1.338.0) | [`b3aacea`](https://github.com/zendesk/setup-ruby/commit/b3aaceaef7e0ee231b499e7b5f49c03fc1d32199) | [`HARDENING.md`](https://github.com/chainguard-actions/zendesk-setup-ruby/blob/v1.338.0/HARDENING.md) |
 | v1.339.0 | [`v1.339.0`](https://github.com/chainguard-actions/zendesk-setup-ruby/tree/v1.339.0) | [`4e97ecd`](https://github.com/zendesk/setup-ruby/commit/4e97ecde5048e1e0816923020652678063ffbf65) | [`HARDENING.md`](https://github.com/chainguard-actions/zendesk-setup-ruby/blob/v1.339.0/HARDENING.md) |
 | v1.341.0 | [`v1.341.0`](https://github.com/chainguard-actions/zendesk-setup-ruby/tree/v1.341.0) | [`20eb24b`](https://github.com/zendesk/setup-ruby/commit/20eb24b0d509e2b9ed9b6d42ddfeb992915e0564) | [`HARDENING.md`](https://github.com/chainguard-actions/zendesk-setup-ruby/blob/v1.341.0/HARDENING.md) |
+| v1.342.0 | [`v1.342.0`](https://github.com/chainguard-actions/zendesk-setup-ruby/tree/v1.342.0) | [`f9c4492`](https://github.com/zendesk/setup-ruby/commit/f9c4492e86def3e644ab32a0ef185eda5b0c20d0) | [`HARDENING.md`](https://github.com/chainguard-actions/zendesk-setup-ruby/blob/v1.342.0/HARDENING.md) |
 
 ## Privacy
 
