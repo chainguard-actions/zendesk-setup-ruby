@@ -1,0 +1,40 @@
+name: Test rubygems latest update
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          ruby-version: '3.3'
+          rubygems: latest
+          bundler: none
+      - name: Assert gem available from ruby prefix
+        env:
+          PREFIX: ${{ steps.action.outputs.ruby-prefix }}
+        run: |
+          echo "prefix: $PREFIX"
+          if [ -z "$PREFIX" ]; then
+            echo "FAIL: ruby-prefix output is empty"
+            exit 1
+          fi
+          which gem
+          GV="$(gem --version)"
+          echo "rubygems version: $GV"
+          if ! echo "$GV" | grep -qE '^[0-9]+\.[0-9]+(\.[0-9]+)?'; then
+            echo "FAIL: unexpected gem --version output"
+            exit 1
+          fi
+          MAJOR="${GV%%.*}"
+          if [ "$MAJOR" -lt 3 ]; then
+            echo "FAIL: expected RubyGems >= 3 after update"
+            exit 1
+          fi
+          case "$(command -v gem)" in
+            "$PREFIX"/*) ;;
+            *) echo "FAIL: gem not under ruby prefix"; exit 1 ;;
+          esac
+          echo "PASS"

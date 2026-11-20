@@ -1,0 +1,30 @@
+name: Test bundler latest installation
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          ruby-version: '3.3'
+          bundler: latest
+      - name: Assert bundler available
+        env:
+          PREFIX: ${{ steps.action.outputs.ruby-prefix }}
+        run: |
+          which bundle
+          OUT="$(bundle --version)"
+          echo "bundler: $OUT"
+          # Bundler <4 prints "Bundler version X.Y.Z", Bundler 4+ prints just "X.Y.Z"
+          if ! echo "$OUT" | grep -qE '(Bundler version )?[0-9]+\.[0-9]+(\.[0-9]+)?'; then
+            echo "FAIL: unexpected bundler version output"
+            exit 1
+          fi
+          case "$(which bundle)" in
+            "$PREFIX"/*) ;;
+            *) echo "FAIL: bundle not under ruby prefix '$PREFIX'"; exit 1 ;;
+          esac
+          echo "PASS"
