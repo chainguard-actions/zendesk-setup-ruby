@@ -1,0 +1,34 @@
+name: Test specific bundler version
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          ruby-version: '3.3.6'
+          bundler: '2.4.22'
+      - name: Assert bundler version installed
+        env:
+          PREFIX: ${{ steps.action.outputs.ruby-prefix }}
+        run: |
+          echo "ruby-prefix: $PREFIX"
+          [ -n "$PREFIX" ] || { echo "FAIL: empty ruby-prefix"; exit 1; }
+          # Ruby 3.3.6 ships a newer default Bundler (2.5.x), so plain `bundle`
+          # picks the highest version. Verify 2.4.22 is installed and usable.
+          LIST="$("$PREFIX/bin/gem" list '^bundler$')"
+          echo "gem list: $LIST"
+          if ! echo "$LIST" | grep -q "2\.4\.22"; then
+            echo "FAIL: Bundler 2.4.22 not in installed gems"
+            exit 1
+          fi
+          OUT="$(bundle _2.4.22_ --version)"
+          echo "bundle _2.4.22_: $OUT"
+          if ! echo "$OUT" | grep -q "2\.4\.22"; then
+            echo "FAIL: expected Bundler 2.4.22"
+            exit 1
+          fi
+          echo "PASS"

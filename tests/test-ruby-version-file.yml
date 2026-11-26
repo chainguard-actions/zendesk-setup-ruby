@@ -1,0 +1,26 @@
+name: Test version from .ruby-version via working-directory
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          working-directory: tests/fixtures/ruby-version-file
+          bundler: none
+      - name: Assert ruby version read from .ruby-version
+        env:
+          PREFIX: ${{ steps.action.outputs.ruby-prefix }}
+        run: |
+          echo "ruby-prefix: $PREFIX"
+          [ -n "$PREFIX" ] || { echo "FAIL: empty ruby-prefix"; exit 1; }
+          V="$(ruby -e 'print RUBY_VERSION')"
+          echo "ruby version: $V"
+          if [ "$V" != "3.2.6" ]; then
+            echo "FAIL: expected 3.2.6"
+            exit 1
+          fi
+          echo "PASS"
